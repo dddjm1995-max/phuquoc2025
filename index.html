@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🌴 富國島五天四夜行程</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      min-height:100vh;color:#333
+    }
+    .container{max-width:1200px;margin:0 auto;padding:20px}
+    .header{text-align:center;margin-bottom:24px;background:rgba(255,255,255,.95);
+      padding:30px;border-radius:20px;backdrop-filter:blur(10px);
+      box-shadow:0 20px 40px rgba(0,0,0,.1)}
+    .header h1{font-size:2.5rem;margin-bottom:10px;
+      background:linear-gradient(45deg,#ff6b6b,#4ecdc4);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .header p{font-size:1.2rem;color:#666;margin-top:10px}
+
+    /* Open-Meteo 天氣卡片（嵌入） */
+    .wx-embed{background:#f6f7fb;border-radius:18px;padding:20px;margin:0 auto 28px;max-width:980px;
+      box-shadow:0 12px 28px rgba(0,0,0,.08);border:1px solid #e6e8f0}
+    .wx-embed .wrap{max-width:920px;margin:0 auto}
+    .wx-embed .title{margin:0 0 6px}
+    .wx-embed .sub{color:#667085;margin:0 0 16px;font-size:14px}
+    .wx-embed .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+    .wx-embed .card{background:#fff;border:1px solid #e6e8f0;border-radius:14px;padding:14px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    .wx-embed .date{font-weight:700;margin-bottom:6px}
+    .wx-embed .temp{font-size:28px;font-weight:800;line-height:1.1}
+    .wx-embed .hi-lo{color:#667085;font-size:14px;margin-top:4px}
+    .wx-embed .desc{font-size:14px;margin-top:8px}
+
+    .day-tabs{display:flex;justify-content:center;margin-bottom:30px;flex-wrap:wrap;gap:10px}
+    .day-tab{padding:12px 24px;background:rgba(255,255,255,.2);border:none;border-radius:25px;color:#fff;
+      cursor:pointer;font-weight:bold;transition:.3s;backdrop-filter:blur(10px)}
+    .day-tab:hover{background:rgba(255,255,255,.3);transform:translateY(-2px)}
+    .day-tab.active{background:linear-gradient(45deg,#ff6b6b,#4ecdc4);transform:translateY(-2px);
+      box-shadow:0 10px 20px rgba(0,0,0,.2)}
+
+    .day-content{display:none;background:rgba(255,255,255,.95);padding:30px;border-radius:20px;
+      backdrop-filter:blur(10px);box-shadow:0 20px 40px rgba(0,0,0,.1);animation:fadeIn .5s ease}
+    .day-content.active{display:block}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+    .day-title{font-size:1.6rem;margin-bottom:16px;text-align:center;color:#333;padding:15px;
+      background:linear-gradient(45deg,#ffecd2,#fcb69f);border-radius:15px;display:flex;
+      align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap}
+
+    .time-section{margin-bottom:30px;padding:20px;border-left:4px solid #ff6b6b;
+      background:linear-gradient(to right,#fff5f5,#ffffff);border-radius:0 15px 15px 0;transition:.3s}
+    .time-section:hover{transform:translateX(5px);box-shadow:0 10px 20px rgba(0,0,0,.1)}
+    .time-title{font-size:1.2rem;font-weight:700;margin-bottom:15px;color:#ff6b6b}
+
+    .activity-item{margin-bottom:12px;padding:15px;background:rgba(255,255,255,.8);
+      border-radius:10px;display:flex;align-items:center;transition:.3s;position:relative}
+    .activity-item:hover{background:rgba(76,205,196,.1);transform:translateX(10px)}
+    .activity-icon{font-size:1.5rem;margin-right:15px;min-width:30px}
+    .activity-text{flex:1}
+    .activity-name{font-weight:700;color:#333;margin-bottom:5px}
+    .activity-description{color:#666;font-size:.9rem}
+    .google-link{margin-left:auto;padding:8px 15px;background:linear-gradient(45deg,#4285f4,#34a853);
+      color:#fff;text-decoration:none;border-radius:20px;font-size:.8rem;font-weight:700;transition:.3s;
+      display:flex;align-items:center;gap:5px}
+    .google-link:hover{background:linear-gradient(45deg,#3367d6,#2e8b57);transform:scale(1.05);
+      box-shadow:0 4px 12px rgba(0,0,0,.2)}
+
+    .cafe-highlight{background:linear-gradient(45deg,#ffeaa7,#fab1a0)!important;border-left:4px solid #e17055!important}
+    .cafe-highlight .activity-item{background:rgba(255,255,255,.9)}
+    .cafe-highlight .activity-item:hover{background:rgba(253,203,110,.2)}
+
+    .progress-bar{position:fixed;top:0;left:0;height:4px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);
+      transition:width .3s;z-index:1000}
+
+    /* ▶ 旅遊小幫手（Modal） */
+    .floating-info{position:fixed;bottom:30px;right:30px;background:linear-gradient(45deg,#ff6b6b,#4ecdc4);
+      color:#fff;padding:15px 20px;border-radius:50px;cursor:pointer;box-shadow:0 10px 20px rgba(0,0,0,.2);
+      transition:.3s;font-weight:700;z-index:1100}
+    .floating-info:hover{transform:translateY(-5px);box-shadow:0 15px 30px rgba(0,0,0,.3)}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;
+      justify-content:center;z-index:1200}
+    .modal{background:#fff;border-radius:16px;max-width:720px;width:92vw;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #eee}
+    .modal-title{font-weight:800}
+    .modal-body{padding:16px 20px;max-height:70vh;overflow:auto}
+    .close-btn{background:#f2f2f2;border:none;border-radius:8px;padding:8px 12px;cursor:pointer}
+    .helper-table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    .helper-table th,.helper-table td{padding:10px 12px;text-align:left}
+    .helper-table th{font-size:.95rem;color:#666}
+    .helper-row{background:#fafafa;border-radius:10px}
+    .helper-row td:first-child{font-weight:700}
+    .muted{color:#777;font-size:.9rem}
+
+    @media (max-width:768px){
+      .container{padding:10px}
+      .header h1{font-size:2rem}
+      .day-tab{padding:10px 16px;font-size:.9rem}
+      .google-link{padding:6px 10px;font-size:.7rem}
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <div class="container">
+    <div class="header">
+      <h1>🌴 富國島五天四夜行程</h1>
+      <p>探索越南最美麗的海島天堂</p>
+      <p style="font-size:1rem;margin-top:15px;color:#888;">放鬆休息</p>
+    </div>
+
+    <!-- 免 API Key：Open-Meteo 5日預報卡片 -->
+    <section class="wx-embed">
+      <div class="wrap">
+        <h2 class="title">Duong Dong, Phu Quoc｜5日天氣</h2>
+        <p class="sub">時間範圍：2025-09-30 → 2025-10-04（自動以當地時區顯示）</p>
+        <div id="grid" class="grid" role="list"></div>
+      </div>
+    </section>
+
+    <div class="day-tabs">
+      <button class="day-tab" onclick="showDay(0,this)">住宿景點美食資訊</button>
+      <button class="day-tab active" onclick="showDay(1,this)">Day 1</button>
+      <button class="day-tab" onclick="showDay(2,this)">Day 2</button>
+      <button class="day-tab" onclick="showDay(3,this)">Day 3</button>
+      <button class="day-tab" onclick="showDay(4,this)">Day 4</button>
+      <button class="day-tab" onclick="showDay(5,this)">Day 5</button>
+    </div>
+
+    <!-- Day 1 -->
+    <div class="day-content active" id="day1">
+      <div class="day-title">Day 1｜9/30 悠閒抵達與夕陽美景</div>
+
+      <div class="time-section">
+        <div class="time-title">✈️ 航班</div>
+        <div class="activity-item">
+          <div class="activity-icon">✈️</div>
+          <div class="activity-text">
+            <div class="activity-name">TPE 14:10 → PQC 16:50</div>
+            <div class="activity-description">抵達後入境＆取行李</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">下午 / 行程</div>
+        <div class="activity-item">
+          <div class="activity-icon">🏨</div>
+          <div class="activity-text">
+            <div class="activity-name">前往住宿：An Nhien Retreat Phu Quoc</div>
+            <div class="activity-description">放行李、短暫休息</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/Vdm5x2tLvrXKnx6R8">📍 Google Maps</a>
+        </div>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">晚上 / 行程</div>
+        <div class="activity-item">
+          <div class="activity-icon">🍴</div>
+          <div class="activity-text">
+            <div class="activity-name">晚餐：傳統越南餐廳</div>
+            <div class="activity-description">在地口味，簡單不踩雷</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/ifsKUvrBbMpMM55q6">📍 Google Maps</a>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">💆‍♀️</div>
+          <div class="activity-text">
+            <div class="activity-name">Spa Canary Music 1（越式按摩＋洗髮）</div>
+            <div class="activity-description">旅途後舒緩放鬆</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/vDP8182A2DzZHeh9A">📍 Google Maps</a>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">🍸</div>
+          <div class="activity-text">
+            <div class="activity-name">Origin 1982 - Speakeasy bar（The Last Old House）</div>
+            <div class="activity-description">隱藏風格酒吧，睡前小酌</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/9tYpkk1eSEK8DUJh8">📍 Google Maps</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 2 -->
+    <div class="day-content" id="day2">
+      <div class="day-title">Day 2｜10/01 神奇造景拍照＆泥漿浴放鬆</div>
+
+      <div class="time-section">
+        <div class="time-title">上午 / 行程</div>
+        <div class="activity-item">
+          <div class="activity-icon">🧘‍♀️</div>
+          <div class="activity-text">
+            <div class="activity-name">飯店早餐＆瑜伽</div>
+            <div class="activity-description">用舒緩節奏開啟一天</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">🛵</div>
+          <div class="activity-text">
+            <div class="activity-name">租機車（加油站較早關門，請留意）</div>
+            <div class="activity-description">取車檢查煞車、燈光與油量</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://share.google/sCvdzsSHYVm8DOlOx">📍 取車位置</a>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">💰</div>
+          <div class="activity-text">
+            <div class="activity-name">換匯（珠寶店）</div>
+            <div class="activity-description">建議台幣先換美金，再以美金換越南盾</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/SF7i8addnqwGx4ES6">📍 Google Maps</a>
+        </div>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">中午 / 午餐</div>
+        <div class="activity-item">
+          <div class="activity-icon">🍜</div>
+          <div class="activity-text">
+            <div class="activity-name">Bún quậy Kiến-Xây（A-C noodles）小卷米線</div>
+            <div class="activity-description">富國島名店，客滿時可耐心等候</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/BX29GFjsd8EpmAGs9">📍 Google Maps</a>
+        </div>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">下午 / 行程</div>
+        <div class="activity-item">
+          <div class="activity-icon">📸</div>
+          <div class="activity-text">
+            <div class="activity-name">THE PEAK PHU QUOC</div>
+            <div class="activity-description">神奇造景拍照、輕鬆散步</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/rPALQyTeHAejeoX77">📍 Google Maps</a>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">🛁</div>
+          <div class="activity-text">
+            <div class="activity-name">Versailles Mud Spa（建議 15:00 入場）</div>
+            <div class="activity-description">泥漿浴放鬆；傳聞 19:00 左右可能有火舞（視現場）</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://www.klook.com/zh-TW/activity/55129-mud-bath-spa-experience-in-phu-quoc/?_currency=TWD&campaignid=22928465445&adgroupid=184609745699&targetid=kwd-2433557149111&matchtype=b&device=c&creative=771002596314&extensionid=&keyword=凡爾賽%20泥%20浴%20水療%20中心&loc_interest_ms=&loc_physical_ms=1012810&network=g&utm_content=campaignid_22928465445_adgroupid_184609745699&gad_source=1&gad_campaignid=22928465445&gbraid=0AAAAACa_CWzIhTXJK22e6rOkOh1WOEW3P&gclid=CjwKCAjwlt7GBhAvEiwAKal0cofMIF40BYQdUfAW4hJyPBaTSbSC-Y-DSTS_mjKSrmzLDZbSYmWu9hoC3xYQAvD_BwE
+          ">🔗 預訂頁</a>
+        </div>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">晚上 / 晚餐</div>
+        <div class="activity-item">
+          <div class="activity-icon">🍽️</div>
+          <div class="activity-text">
+            <div class="activity-name">Mai Jo Restaurant</div>
+            <div class="activity-description">越南 × 葡萄牙風味的異國料理</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/917PUWGVzbkZMzrw9">📍 Google Maps</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 3 -->
+    <div class="day-content" id="day3">
+      <div class="day-title">Day 3｜10/02 歷史文化與泥漿浴放鬆</div>
+
+      <div class="time-section">
+        <div class="time-title">上午 / 行程</div>
+        <div class="activity-item">
+          <div class="activity-icon">🏛️</div>
+          <div class="activity-text">
+            <div class="activity-name">Phu Quoc Prison History Museum（監獄博物館）</div>
+            <div class="activity-description">了解富國島近代史</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/dT3DbiFojuKMroJS9">📍 Google Maps</a>
+        </div>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">中午 / 午餐</div>
+        <div class="activity-item">
+          <div class="activity-icon">🍲</div>
+          <div class="activity-text">
+            <div class="activity-name">Cái Mâm Bistro（蓮藕 Pho）</div>
+            <div class="activity-description">清爽特別的風味</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/FLnV8Q2qag1NC2tMA">📍 Google Maps</a>
+        </div>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">下午 / 行程</div>
+        <div class="activity-item">
+          <div class="activity-icon">🪨</div>
+          <div class="activity-text">
+            <div class="activity-name">Suối Tranh Waterfall</div>
+            <div class="activity-description">瀑布步道、大石間散步清涼</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/voDxNz9gdp7ALhQJA">📍 Google Maps</a>
+        </div>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">晚上 / 晚餐前</div>
+        <div class="activity-item">
+          <div class="activity-icon">🍴</div>
+          <div class="activity-text">
+            <div class="activity-name">Camia Restaurant — 海景第一排</div>
+            <div class="activity-description">可選日落時段，景色佳</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/aQAfZvsq7RRDX63A9">📍 Google Maps</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 4 -->
+    <div class="day-content" id="day4">
+      <div class="day-title">Day 4｜10/03 文青咖啡＆火舞之夜</div>
+
+      <div class="time-section">
+        <div class="time-title">中午 / 午餐</div>
+        <div class="activity-item">
+          <div class="activity-icon">🥓</div>
+          <div class="activity-text">
+            <div class="activity-name">Nhà Hàng Coral BBQ Phú Quốc（吃到飽石板 BBQ）</div>
+            <div class="activity-description">店員代烤，省心省力</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/fMkmyx3HWR4YmQng6">📍 Google Maps</a>
+        </div>
+      </div>
+
+      <div class="time-section cafe-highlight">
+        <div class="time-title">☕ 下午 / 行程</div>
+        <div class="activity-item">
+          <div class="activity-icon">☕</div>
+          <div class="activity-text">
+            <div class="activity-name">Mix Bakery Coffee & Tea（麵包店裡的咖啡廳）</div>
+            <div class="activity-description">演出：週二、四、六 19:45–21:45；週日 09:00–11:00</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/jPHVpnke5JhmT6MT6">📍 Google Maps</a>
+        </div>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">晚上 / 晚餐＆表演</div>
+        <div class="activity-item">
+          <div class="activity-icon">🔥</div>
+          <div class="activity-text">
+            <div class="activity-name">OCSEN Beach Bar</div>
+            <div class="activity-description">海灘酒吧，火舞表演</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/CQdu6AN3qxakjpGF8">📍 Google Maps</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 5 -->
+    <div class="day-content" id="day5">
+      <div class="day-title">Day 5｜10/04 換飯店等朋友來</div>
+
+      <div class="time-section">
+        <div class="time-title">上午 / 行程</div>
+        <div class="activity-item">
+          <div class="activity-icon">🧳</div>
+          <div class="activity-text">
+            <div class="activity-name">收行李・退房</div>
+            <div class="activity-description">聯絡新飯店確認 Check-in 時間</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">中午 / 午餐</div>
+        <div class="activity-item">
+          <div class="activity-icon">🍙</div>
+          <div class="activity-text">
+            <div class="activity-name">김가네김밥(중부점) KIMGANE</div>
+            <div class="activity-description">韓式簡餐補充體力</div>
+          </div>
+          <a class="google-link" target="_blank" href="https://maps.app.goo.gl/x36j2SLtxtbkPZ1GA?g_st=ipc">📍 Google Maps</a>
+        </div>
+      </div>
+
+      <div class="time-section">
+        <div class="time-title">下午 / 行程</div>
+        <div class="activity-item">
+          <div class="activity-icon">🏨</div>
+          <div class="activity-text">
+            <div class="activity-name">Check-in（最早 15:00）— Seashells Phu Quoc Hotel & Spa</div>
+            <div class="activity-description">迎接朋友抵達、整理休息</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 住宿/租車資訊（Day0） -->
+    <!-- 住宿/租車/景點美食資訊（Day0） -->
+<div class="day-content" id="day0">
+  <!-- 飯店 -->
+  <div class="time-section">
+    <div class="time-title">🏨 飯店資訊</div>
+    <div class="activity-item">
+      <div class="activity-icon">🏨</div>
+      <div class="activity-text">
+        <div class="activity-name">Sunset Beach Resort</div>
+        <div class="activity-description">靠近陽東鎮，交通方便</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/kryUdtNqeVC3A2Hw6">📍 Google Maps</a>
+    </div>
+  </div>
+
+  <!-- 景點 -->
+  <div class="time-section">
+    <div class="time-title">📍 景點推薦</div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🏯</div>
+      <div class="activity-text">
+        <div class="activity-name">Dinh Cậu 神社</div>
+        <div class="activity-description">海邊小神殿，夕陽絕佳地點</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/k31bD95KAXsQcHodA">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🌱</div>
+      <div class="activity-text">
+        <div class="activity-name">Vườn tiêu Hai Dương 胡椒園</div>
+        <div class="activity-description">在地胡椒園，認識胡椒種植</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/YyGKg2jCcPHBb7W78">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🐝</div>
+      <div class="activity-text">
+        <div class="activity-name">Phu Quoc Bee Farm 蜂場</div>
+        <div class="activity-description">近距離了解蜂蜜與生態</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/w3pxdJc1xLzenvGw8">📍 Google Maps</a>
+    </div>
+  </div>
+
+  <!-- 美食 -->
+  <div class="time-section">
+    <div class="time-title">🍽️ 美食清單</div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🍴</div>
+      <div class="activity-text">
+        <div class="activity-name">Cơm Gia Đình</div>
+        <div class="activity-description">傳統越南家常菜</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/r8ZbBcGKu1d8R2Vb7">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🍲</div>
+      <div class="activity-text">
+        <div class="activity-name">Nhà Xưa 68</div>
+        <div class="activity-description">多人推薦的越式火鍋</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://share.google/sVKiZSteOzpXsWwY7">📍 位置</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🥢</div>
+      <div class="activity-text">
+        <div class="activity-name">Mộc Cuisine Phú Quốc</div>
+        <div class="activity-description">環境美、拍照友善的餐廳</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/msrdkKBjaCd4YxUq9">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🥗</div>
+      <div class="activity-text">
+        <div class="activity-name">Saigonese Eatery</div>
+        <div class="activity-description">綠意滿滿的多國料理</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/CDD5xr41sdN8qMXy6">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🥩</div>
+      <div class="activity-text">
+        <div class="activity-name">Bò Tơ Quán</div>
+        <div class="activity-description">烤肉吃到飽，店員代烤</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/uiGL7u4yMKFtqB6f8">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🇰🇷</div>
+      <div class="activity-text">
+        <div class="activity-name">한국관 푸꾸옥 HAN KUK QUAN</div>
+        <div class="activity-description">韓式料理</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://share.google/ibGk3jQHkE79dn4bp">📍 位置</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🍙</div>
+      <div class="activity-text">
+        <div class="activity-name">김가네김밥(중부점) KIMGANE</div>
+        <div class="activity-description">簡單韓式小食</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/x36j2SLtxtbkPZ1GA?g_st=ipc">📍 Google Maps</a>
+    </div>
+  </div>
+
+  <!-- 咖啡廳 -->
+  <div class="time-section cafe-highlight">
+    <div class="time-title">☕ 咖啡廳</div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🍨</div>
+      <div class="activity-text">
+        <div class="activity-name">Buddy Ice Cream & Café</div>
+        <div class="activity-description">神社附近，消暑甜點好去處</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/AqMohp16pfFB1RRG9">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🧊</div>
+      <div class="activity-text">
+        <div class="activity-name">ANBA COFFEE</div>
+        <div class="activity-description">有冷氣、環境舒適</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/8oaw4Xa92wX98NpSA">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">☕</div>
+      <div class="activity-text">
+        <div class="activity-name">Chuồn Chuồn Bistro & Sky Bar</div>
+        <div class="activity-description">高地景觀咖啡，椰子咖啡好評</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/4MDchMS5KR9w7BoP6?g_st=ic">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🥚</div>
+      <div class="activity-text">
+        <div class="activity-name">AROMA Cafe Bistro Bar</div>
+        <div class="activity-description">蛋咖啡／椰子咖啡推薦</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/A1tmKTSmA965o2W36">📍 Google Maps</a>
+    </div>
+  </div>
+
+  <!-- 夕陽餐廳 / 火舞 -->
+  <div class="time-section">
+    <div class="time-title">🌅 夕陽餐廳／火舞</div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🪨</div>
+      <div class="activity-text">
+        <div class="activity-name">On The Rock Restaurant</div>
+        <div class="activity-description">海景第一排，看夕陽的好位置</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/a7BkY2dHxV9QspkJ9">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🌊</div>
+      <div class="activity-text">
+        <div class="activity-name">Camia Restaurant</div>
+        <div class="activity-description">海景第一排，適合日落晚餐</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/aQAfZvsq7RRDX63A9">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🔥</div>
+      <div class="activity-text">
+        <div class="activity-name">OCSEN Beach Bar</div>
+        <div class="activity-description">海灘酒吧，夜間火舞表演</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/CQdu6AN3qxakjpGF8">📍 Google Maps</a>
+    </div>
+
+    <div class="activity-item">
+      <div class="activity-icon">🍹</div>
+      <div class="activity-text">
+        <div class="activity-name">PH Rooftop Bar & Lounge</div>
+        <div class="activity-description">高樓夜景，約 21:30 有煙火</div>
+      </div>
+      <a class="google-link" target="_blank" href="https://maps.app.goo.gl/LgDCnC6kagkbgN2n9">📍 Google Maps</a>
+    </div>
+  </div>
+</div>
+  <!-- 📍 旅遊小幫手：彈出視窗 -->
+  <div class="modal-overlay" id="helperModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">📍 旅遊小幫手</div>
+        <button class="close-btn" onclick="toggleInfo(false)">關閉</button>
+      </div>
+      <div class="modal-body">
+        <p class="muted" style="margin-bottom:10px">越南常用旅遊用語（快速查表）</p>
+        <table class="helper-table">
+          <thead>
+            <tr><th>越南語</th><th>中文意思</th><th>發音提示</th></tr>
+          </thead>
+          <tbody>
+            <tr class="helper-row"><td>Xin chào</td><td>你好</td><td>辛 喬</td></tr>
+            <tr class="helper-row"><td>Cảm ơn</td><td>謝謝</td><td>感 ㄣ</td></tr>
+            <tr class="helper-row"><td>Không có gì</td><td>不客氣</td><td>空 ㄍㄚ ㄗ</td></tr>
+            <tr class="helper-row"><td>Ngon quá!</td><td>很好吃！</td><td>吳 ㄋ ㄎㄨㄚ</td></tr>
+            <tr class="helper-row"><td>Xin lỗi</td><td>對不起 / 不好意思</td><td>辛 羅伊</td></tr>
+            <tr class="helper-row"><td>Bao nhiêu tiền?</td><td>多少錢？</td><td>包 妮歐 ㄉㄧㄢ</td></tr>
+            <tr class="helper-row"><td>Đắt quá</td><td>太貴了</td><td>達 ㄎㄨㄚ</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右下角浮動按鈕 -->
+  <div class="floating-info" onclick="toggleInfo(true)">📍 旅遊小幫手</div>
+
+  <!-- Tabs／互動 JS -->
+  <script>
+    let currentDay = 1;
+    function showDay(day, element){
+      document.querySelectorAll('.day-content').forEach(c=>c.classList.remove('active'));
+      document.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('day'+day).classList.add('active');
+      element.classList.add('active');
+      currentDay = day; updateProgress();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+    function updateProgress(){
+      const progress = (currentDay/5)*100;
+      document.getElementById('progressBar').style.width = progress + '%';
+    }
+    function toggleInfo(open=true){
+      const modal = document.getElementById('helperModal');
+      modal.style.display = open ? 'flex' : 'none';
+    }
+    document.getElementById('helperModal').addEventListener('click',(e)=>{
+      if(e.target.id==='helperModal') toggleInfo(false);
+    });
+    document.addEventListener('DOMContentLoaded', function(){
+      const items=document.querySelectorAll('.activity-item');
+      items.forEach(item=>{
+        item.addEventListener('click',function(){
+          this.style.transform='scale(0.98)'; setTimeout(()=>{this.style.transform='translateX(10px)';},150);
+        });
+        item.addEventListener('mouseenter',()=>{item.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'});
+        item.addEventListener('mouseleave',()=>{item.style.boxShadow='none'});
+      });
+      updateProgress();
+    });
+  </script>
+
+  <!-- ===== Open-Meteo 5日預報（免 API Key） ===== -->
+  <script>
+    // 顯示範圍
+    const RANGE_START = '2025-09-30';
+    const RANGE_END   = '2025-10-04';
+
+    // 杜東座標
+    const lat = 10.22, lon = 103.96;
+
+    // ====== 圖示設定（SVG，不外載資源）======
+    const ICON_SIZE = 48; // 圖示大小(px)
+    const svg = (p)=>`<svg width="${ICON_SIZE}" height="${ICON_SIZE}" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">${p}</svg>`;
+    const I = {
+      sun: svg(`<circle cx="24" cy="24" r="9" fill="#FDB813"/><g stroke="#FDB813" stroke-width="3" stroke-linecap="round">
+        <path d="M24 4v6"/><path d="M24 38v6"/><path d="M4 24h6"/><path d="M38 24h6"/>
+        <path d="M9.2 9.2l4.2 4.2"/><path d="M34.6 34.6l4.2 4.2"/><path d="M34.6 13.4l4.2-4.2"/><path d="M9.2 38.8l4.2-4.2"/>
+      </g>`),
+      cloud: svg(`<path d="M34 35H16a8 8 0 1 1 3-15.5A10 10 0 0 1 39 23a7 7 0 0 1-5 12z" fill="#C6D3E0"/>`),
+      partCloud: svg(`
+        <circle cx="16" cy="18" r="6" fill="#FDB813"/>
+        <path d="M34 35H16a8 8 0 1 1 3-15.5A10 10 0 0 1 39 23a7 7 0 0 1-5 12z" fill="#C6D3E0"/>
+      `),
+      rain: svg(`
+        <path d="M34 28H16a8 8 0 1 1 3-15.5A10 10 0 0 1 39 16a7 7 0 0 1-5 12z" fill="#C6D3E0"/>
+        <g stroke="#4A90E2" stroke-width="3" stroke-linecap="round">
+          <path d="M18 32l-2 6"/><path d="M24 32l-2 6"/><path d="M30 32l-2 6"/>
+        </g>
+      `),
+      heavyRain: svg(`
+        <path d="M34 28H16a8 8 0 1 1 3-15.5A10 10 0 0 1 39 16a7 7 0 0 1-5 12z" fill="#B8C7D6"/>
+        <g stroke="#2D6FD2" stroke-width="3" stroke-linecap="round">
+          <path d="M16 32l-3 8"/><path d="M22 32l-3 8"/><path d="M28 32l-3 8"/><path d="M34 32l-3 8"/>
+        </g>
+      `),
+      drizzle: svg(`
+        <path d="M34 28H16a8 8 0 1 1 3-15.5A10 10 0 0 1 39 16a7 7 0 0 1-5 12z" fill="#C6D3E0"/>
+        <g stroke="#7FB3F1" stroke-width="2" stroke-linecap="round">
+          <path d="M18 32l-2 4"/><path d="M24 32l-2 4"/><path d="M30 32l-2 4"/>
+        </g>
+      `),
+      thunder: svg(`
+        <path d="M34 28H16a8 8 0 1 1 3-15.5A10 10 0 0 1 39 16a7 7 0 0 1-5 12z" fill="#B8C7D6"/>
+        <path d="M23 31l6-8h-5l3-6" fill="#F5C84C" stroke="#C99A00" stroke-width="2" stroke-linejoin="round"/>
+      `),
+      fog: svg(`
+        <path d="M34 28H16a8 8 0 1 1 3-15.5A10 10 0 0 1 39 16a7 7 0 0 1-5 12z" fill="#D4DDE6"/>
+        <g stroke="#AEB8C2" stroke-width="2" stroke-linecap="round">
+          <path d="M12 34h24"/><path d="M10 38h28"/>
+        </g>
+      `),
+      snow: svg(`
+        <path d="M34 28H16a8 8 0 1 1 3-15.5A10 10 0 0 1 39 16a7 7 0 0 1-5 12z" fill="#C6D3E0"/>
+        <g stroke="#8EC6FF" stroke-width="2" stroke-linecap="round">
+          <path d="M18 33l2 2m4-2l-2 2m6-2l2 2"/>
+        </g>
+      `),
+      unknown: svg(`
+        <path d="M34 30H16a8 8 0 1 1 3-15.5A10 10 0 0 1 39 18a7 7 0 0 1-5 12z" fill="#E5E9EF"/>
+        <text x="24" y="35" text-anchor="middle" font-size="16" fill="#A3AAB2" font-weight="700">?</text>
+      `)
+    };
+
+    function iconByWMO(code){
+      if (code === 0) return I.sun;
+      if (code === 1 || code === 2) return I.partCloud;
+      if (code === 3) return I.cloud;
+      if (code === 45 || code === 48) return I.fog;
+      if ([51,53,55,56,57].includes(code)) return I.drizzle;
+      if ([61,63,66,80,81].includes(code)) return I.rain;
+      if ([65,67,82].includes(code)) return I.heavyRain;
+      if ([95,96,99].includes(code)) return I.thunder;
+      if ([71,73,75,77].includes(code)) return I.snow;
+      return I.unknown;
+    }
+
+    function buildDateRange(startISO, endISO){
+      const out = [];
+      const s = new Date(startISO + 'T00:00:00');
+      const e = new Date(endISO   + 'T00:00:00');
+      for (let d = new Date(s); d <= e; d.setDate(d.getDate()+1)){
+        out.push(new Date(d).toISOString().slice(0,10));
+      }
+      return out;
+    }
+
+    const url = new URL('https://api.open-meteo.com/v1/forecast');
+    url.search = new URLSearchParams({
+      latitude: lat,
+      longitude: lon,
+      timezone: 'auto',
+      forecast_days: '16',
+      daily: ['temperature_2m_max','temperature_2m_min','weathercode'].join(',')
+    }).toString();
+
+    const grid = document.getElementById('grid');
+    const wantDays = buildDateRange(RANGE_START, RANGE_END);
+
+    function render(rows){
+      grid.innerHTML = '';
+      rows.forEach(r=>{
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.role = 'listitem';
+
+        if (r.noForecast) {
+          card.innerHTML = `
+            <div class="date">${r.date}</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
+              <div class="wx-icon">${I.unknown}</div>
+              <div>
+                <div style="font-weight:700">尚無預測資料</div>
+                <div style="color:#98a2b3;font-size:12px">請接近出發日前一週再查看</div>
+              </div>
+            </div>
+          `;
+        } else {
+          const tmax = Math.round(r.tmax);
+          const tmin = Math.round(r.tmin);
+          const icon = iconByWMO(r.code);
+          card.innerHTML = `
+            <div class="date">${r.date}</div>
+            <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
+              <div class="wx-icon">${icon}</div>
+              <div>
+                <div class="temp" style="font-size:28px;font-weight:800">${tmax}° <span style="font-size:16px;color:#98a2b3">/ ${tmin}°</span></div>
+              </div>
+            </div>
+          `;
+        }
+        grid.appendChild(card);
+      });
+    }
+
+    function rowsFromEmpty(){ return wantDays.map(date=>({ date, noForecast:true })); }
+    function onFail(){ render(rowsFromEmpty()); }
+
+    fetch(url)
+      .then(r=>r.json())
+      .then(data=>{
+        if (!data || !data.daily || !Array.isArray(data.daily.time)) { render(rowsFromEmpty()); return; }
+        const idx = Object.create(null);
+        data.daily.time.forEach((iso,i)=>{ idx[iso]=i; });
+        const rows = wantDays.map(date=>{
+          const i = idx[date];
+          if (i === undefined) return { date, noForecast:true };
+          const tmax = data.daily.temperature_2m_max?.[i];
+          const tmin = data.daily.temperature_2m_min?.[i];
+          const code = data.daily.weathercode?.[i];
+          if (![tmax,tmin,code].every(v => typeof v === 'number' && Number.isFinite(v))) {
+            return { date, noForecast:true };
+          }
+          return { date, tmax, tmin, code, noForecast:false };
+        });
+        render(rows);
+      })
+      .catch(()=> onFail());
+  </script>
+</body>
+</html>
